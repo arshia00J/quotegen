@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import random
 
@@ -22,6 +23,15 @@ quotes = [
 ]
 
 app = FastAPI()
+
+# Enable CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # You can restrict this to specific origins
+    allow_credentials=True,
+    allow_methods=["*"],  # You can restrict this to specific HTTP methods
+    allow_headers=["*"],  # You can restrict this to specific headers
+)
 
 @app.get("/quotes")
 def get_all_quotes():

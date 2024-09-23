@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quote Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 100px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #quote-display {
+            margin: 20px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Quote Manager</h1>
+
+        <button onclick="getRandomQuote()">Random Quote</button>
+        <button onclick="showAddQuoteForm()">Add Quote</button>
+        <button onclick="showDeleteQuoteForm()">Delete Quote</button>
+
+        <div id="quote-display">
+            <p id="quote-text">Your quote will appear here.</p>
+            <p id="quote-author"></p>
+        </div>
+
+        <!-- Add Quote Form -->
+        <div id="add-quote-form" style="display: none;">
+            <h3>Add a New Quote</h3>
+            <input type="text" id="new-quote-text" placeholder="Enter quote" />
+            <input type="text" id="new-quote-author" placeholder="Enter author" />
+            <button onclick="addQuote()">Submit</button>
+        </div>
+
+        <!-- Delete Quote Form -->
+        <div id="delete-quote-form" style="display: none;">
+            <h3>Delete a Quote</h3>
+            <input type="number" id="quote-id" placeholder="Enter Quote ID" />
+            <button onclick="deleteQuote()">Delete</button>
+        </div>
+    </div>
+
+    <script>
+        const apiUrl = 'http://127.0.0.1:8000'; // Adjust the FastAPI URL if necessary
+
+        function getRandomQuote() {
+            fetch(`${apiUrl}/quotes/random`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('quote-text').innerText = `"${data.quote}"`;
+                    document.getElementById('quote-author').innerText = `- ${data.author}`;
+                });
+        }
+
+        function showAddQuoteForm() {
+            document.getElementById('add-quote-form').style.display = 'block';
+            document.getElementById('delete-quote-form').style.display = 'none';
+        }
+
+        function showDeleteQuoteForm() {
+            document.getElementById('add-quote-form').style.display = 'none';
+            document.getElementById('delete-quote-form').style.display = 'block';
+        }
+
+        function addQuote() {
+            const quoteText = document.getElementById('new-quote-text').value;
+            const quoteAuthor = document.getElementById('new-quote-author').value;
+
+            fetch(`${apiUrl}/quotes`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ quote: quoteText, author: quoteAuthor })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                document.getElementById('new-quote-text').value = '';
+                document.getElementById('new-quote-author').value = '';
+            });
+        }
+
+        function deleteQuote() {
+            const quoteId = document.getElementById('quote-id').value;
+
+            fetch(`${apiUrl}/quotes/${quoteId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert(data.message);
+                    document.getElementById('quote-id').value = '';
+                } else {
+                    alert('Quote not found.');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
